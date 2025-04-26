@@ -17,7 +17,7 @@
                 -7px -7px 23px #ededed;
         }
 
-        body{
+        body {
             background-image: url('https://www.shutterstock.com/shutterstock/videos/3734739131/thumb/1.jpg?ip=x480');
             background-size: cover;
 
@@ -39,16 +39,12 @@
                     <div class="mb-3">
                         <button class="btn btn-success" id="add">Add</button>
                     </div>
-                    <select name="" id="select">
-                        <option value="">High</option>
-                        <option value="">Medium</option>
-                        <option value="">Low</option>
-                    </select>
+                    <select name="" id="select"></select>
                 </div>
             </div>
             <div class="border mt-5">
                 <div class="border border-danger bg-white" id="contant">
-                    
+
                 </div>
             </div>
         </div>
@@ -58,27 +54,29 @@
         integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
         crossorigin="anonymous"></script>
 
-        <script>
-            let cardArr = JSON.parse(localStorage.getItem("arr")) || [];
-            let contant = document.getElementById("contant");
-            let input = document.getElementById("input");
-            let select = document.getElementById("select");
-        
-            let icons = {
-                High: "💚",
-                Medium: "💙",
-                Low: "❤️"
-            };
-        
-            function renderTasks() {
-                contant.innerHTML = "";
-                cardArr.forEach((task, idx) => {
-                    contant.innerHTML += `
+    <script>
+        let cardArr = JSON.parse(localStorage.getItem("arr")) || [];
+        let contant = document.getElementById("contant");
+        let input = document.getElementById("input");
+        let select = document.getElementById("select");
+        let isEdit = false;
+        let editedObj = {};
+        let editedIdx;
+        let icons = {
+            High: "💚",
+            Medium: "💙",
+            Low: "❤️"
+        };
+
+        function renderTasks() {
+            contant.innerHTML = "";
+            cardArr.forEach((task, idx) => {
+                contant.innerHTML += `
                         <div class="d-flex justify-content-between align-items-center border p-2 m-2">
                             <div>
                                 <span>${icons[task.priority]}</span>
                                 <span>${task.text}</span>
-                                <small class="text-muted ms-2">(${task.priority})</small>
+                                <small class="ms-2">(${task.priority})</small>
                             </div>
                             <div>
                                 <button class="btn btn-success btn-sm me-1" onclick="editTask(${idx})">
@@ -90,43 +88,58 @@
                             </div>
                         </div>
                     `;
-                });
-            }
-        
-            document.getElementById("add").addEventListener("click", function () {
-                let taskText = input.value.trim();
-                let priority = select.value;
-        
-                if (taskText && priority) {
-                    cardArr.push({ text: taskText, priority });
-                    localStorage.setItem("arr", JSON.stringify(cardArr));
-                    renderTasks();
-                    input.value = "";
-                } else {
-                    alert("Please enter a task and select a priority.");
-                }
             });
-        
-            function deleteTask(index) {
-                cardArr.splice(index, 1);
+        }
+
+        document.getElementById("add").addEventListener("click", function () {
+            let taskText = input.value.trim();
+            let priority = select.value;
+
+
+            if (isEdit) {
+                editedObj = { text: taskText, priority: priority }
+                cardArr.splice(editedIdx, 1, editedObj)
                 localStorage.setItem("arr", JSON.stringify(cardArr));
                 renderTasks();
-            }
-            
-            function editTask(){
-                
+                input.value = "";
+                isEdit = false;
+                return;
             }
 
-            select.innerHTML = `
+            if (taskText && priority) {
+                cardArr.push({ text: taskText, priority });
+                localStorage.setItem("arr", JSON.stringify(cardArr));
+                renderTasks();
+                input.value = "";
+            } else {
+                alert("Please enter a task and select a priority.");
+            }
+        });
+
+        function deleteTask(index) {
+            cardArr.splice(index, 1);
+            localStorage.setItem("arr", JSON.stringify(cardArr));
+            renderTasks();
+        }
+
+        function editTask(idx) {
+            isEdit = true;
+            input.value = cardArr[idx].text;
+            select.value = cardArr[idx].priority;
+            editedIdx = idx;
+
+        }
+
+        select.innerHTML = `
                 <option value="High">High</option>
                 <option value="Medium">Medium</option>
                 <option value="Low">Low</option>
             `;
-        
 
-            renderTasks();
-        </script>
-        
+
+        renderTasks();
+    </script>
+
 </body>
 
 </html>
